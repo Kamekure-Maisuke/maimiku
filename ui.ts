@@ -1,6 +1,6 @@
 import { bold, cyan, dim, green, red, yellow } from "@std/fmt/colors";
 import { Table } from "@cliffy/table";
-import type { Oshi } from "./db.ts";
+import type { History, Oshi } from "./db.ts";
 
 const COLORS = [cyan, green, yellow, red];
 
@@ -47,6 +47,25 @@ export function showScoreChange(
   ok(`「${name}」 ${diff} → ${yellow(String(newScore))}`);
 }
 
+export function showHistory(name: string, list: History[]): void {
+  if (list.length === 0) {
+    console.log(`\n  ${dim(`「${name}」の履歴はありません。`)}\n`);
+    return;
+  }
+  console.log(`\n  ${bold(cyan(`「${name}」のポイント変動履歴`))}\n`);
+  new Table()
+    .header([dim("日時"), dim("変動"), dim("合計")])
+    .body(list.map((h) => [
+      dim(new Date(h.at).toLocaleString("ja-JP")),
+      h.sign > 0 ? green(`+${h.point}`) : red(`-${h.point}`),
+      yellow(String(h.newScore)),
+    ]))
+    .indent(2)
+    .padding(1)
+    .render();
+  console.log();
+}
+
 export function showHelp(): void {
   console.log(`
   ${bold(cyan("maimiku"))} - 推し管理ツール
@@ -57,5 +76,6 @@ export function showHelp(): void {
     add <名前> <ポイント>      ポイントを加算
     subtract <名前> <ポイント> ポイントを減算
     remove <名前>              推しを削除
+    history <名前>             ポイント変動履歴を表示
 `);
 }

@@ -1,4 +1,11 @@
 export type Oshi = { name: string; score: number };
+export type History = {
+  name: string;
+  point: number;
+  sign: 1 | -1;
+  newScore: number;
+  at: string;
+};
 
 let kv: Deno.Kv;
 
@@ -29,4 +36,16 @@ export async function save(oshi: Oshi): Promise<void> {
 
 export async function remove(name: string): Promise<void> {
   await kv.delete(["oshi", name]);
+}
+
+export async function addHistory(entry: History): Promise<void> {
+  await kv.set(["history", entry.name, Date.now()], entry);
+}
+
+export async function getHistory(name: string): Promise<History[]> {
+  const result: History[] = [];
+  for await (const e of kv.list<History>({ prefix: ["history", name] })) {
+    result.push(e.value);
+  }
+  return result;
 }

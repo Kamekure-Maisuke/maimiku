@@ -11,6 +11,39 @@ Deno.test("db", async (t) => {
     assertEquals(oshi, { name: "ミク", score: 100 });
   });
 
+  await t.step("addHistory", async () => {
+    await db.addHistory({
+      name: "ミク",
+      point: 10,
+      sign: 1,
+      newScore: 110,
+      at: "2026-04-12T00:00:00.000Z",
+    });
+    const list = await db.getHistory("ミク");
+    assertEquals(list.length, 1);
+    assertEquals(list[0], {
+      name: "ミク",
+      point: 10,
+      sign: 1,
+      newScore: 110,
+      at: "2026-04-12T00:00:00.000Z",
+    });
+  });
+
+  await t.step("getHistory", async () => {
+    await db.addHistory({
+      name: "ミク",
+      point: 5,
+      sign: -1,
+      newScore: 105,
+      at: "2026-04-12T01:00:00.000Z",
+    });
+    const list = await db.getHistory("ミク");
+    assertEquals(list.length, 2);
+    assertEquals(list[1].sign, -1);
+    assertEquals(list[1].newScore, 105);
+  });
+
   await t.step("find returns null for unknown", async () => {
     assertEquals(await db.find("存在しない"), null);
   });

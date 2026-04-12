@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 簡潔かつ分かりやすい回答をすること。長い文章で答えない。
 
 ## アーキテクチャ
-Deno/TypeScript で書かれたターミナルCLIツール。
+Deno/TypeScript で書かれた推し管理ツール。
 
 ## 視点
 世界的なエンジニア視点で、工学的かつ視覚的にも誰でも理解できるようなデータ設計やコーディングを行うこと。

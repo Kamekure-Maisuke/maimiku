@@ -1,5 +1,12 @@
 import * as db from "./db.ts";
-import { fail, ok, showHelp, showList, showScoreChange } from "./ui.ts";
+import {
+  fail,
+  ok,
+  showHelp,
+  showHistory,
+  showList,
+  showScoreChange,
+} from "./ui.ts";
 
 await db.openDb();
 
@@ -16,6 +23,13 @@ async function applyScore(
   const oshi = await db.find(name) ?? fail(`「${name}」が見つかりません`);
   oshi.score += point * sign;
   await db.save(oshi);
+  await db.addHistory({
+    name,
+    point,
+    sign,
+    newScore: oshi.score,
+    at: new Date().toISOString(),
+  });
   showScoreChange(name, point, sign, oshi.score);
 }
 
@@ -40,6 +54,13 @@ switch (cmd) {
   case "subtract":
     await applyScore(args[0], args[1], -1, "subtract");
     break;
+
+  case "history": {
+    const name = args[0] ?? fail("名前を指定してください");
+    if (!await db.find(name)) fail(`「${name}」が見つかりません`);
+    showHistory(name, await db.getHistory(name));
+    break;
+  }
 
   case "remove": {
     const name = args[0] ?? fail("名前を指定してください");

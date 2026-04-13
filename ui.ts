@@ -1,8 +1,16 @@
-import { bold, cyan, dim, green, red, yellow } from "@std/fmt/colors";
+import { bold, cyan, dim, green, magenta, red, yellow } from "@std/fmt/colors";
 import { Table } from "@cliffy/table";
 import type { History, Oshi } from "./db.ts";
 
 const COLORS = [cyan, green, yellow, red];
+
+function rank(score: number): string {
+  if (score >= 1000) return magenta("👑 殿堂入り");
+  if (score >= 500)  return yellow("⭐ 推し");
+  if (score >= 200)  return cyan("💙 好き");
+  if (score >= 50)   return green("🌱 気になる");
+  return dim("👀 見習い");
+}
 
 function bar(value: number, max: number, color: (s: string) => string): string {
   const filled = max > 0 ? Math.round((value / max) * 20) : 0;
@@ -30,6 +38,7 @@ export function showList(list: Oshi[]): void {
       dim(oshi.name),
       bar(oshi.score, max, COLORS[i % COLORS.length]),
       yellow(String(oshi.score)),
+      rank(oshi.score),
     ]))
     .indent(2)
     .padding(1)
@@ -44,7 +53,7 @@ export function showScoreChange(
   newScore: number,
 ): void {
   const diff = sign > 0 ? green(`+${point}`) : red(`-${point}`);
-  ok(`「${name}」 ${diff} → ${yellow(String(newScore))}`);
+  ok(`「${name}」 ${diff} → ${yellow(String(newScore))}  ${rank(newScore)}`);
 }
 
 export function showHistory(name: string, list: History[]): void {

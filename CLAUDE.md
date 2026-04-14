@@ -30,3 +30,6 @@ Deno/TypeScript で書かれた推し管理ツール。
 
 ### テスト
 - db操作の記述を行ったら、db_test.tsに必ずテストを書く。
+
+### README
+- 機能を追加したら、READMEも更新。

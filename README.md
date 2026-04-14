@@ -15,4 +15,7 @@ deno task maimiku subtract 名前 ポイント
 
 # 削除
 deno task maimiku remove 名前
+
+# データクリア
+deno task maimiku clear
 ```

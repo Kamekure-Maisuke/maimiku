@@ -5,6 +5,7 @@ export type History = {
   sign: 1 | -1;
   newScore: number;
   at: string;
+  memo?: string;
 };
 
 let kv: Deno.Kv;
@@ -48,4 +49,10 @@ export async function getHistory(name: string): Promise<History[]> {
     result.push(e.value);
   }
   return result;
+}
+
+export async function clearAll(): Promise<void> {
+  for await (const e of kv.list({ prefix: [] })) {
+    await kv.delete(e.key);
+  }
 }

@@ -1,5 +1,6 @@
 import * as db from "./db.ts";
 import {
+  confirm,
   fail,
   ok,
   showHelp,
@@ -15,10 +16,11 @@ async function applyScore(
   pointStr: string,
   sign: 1 | -1,
   cmd: string,
+  memo?: string,
 ) {
   const point = Number(pointStr);
   if (!name || isNaN(point) || point <= 0) {
-    fail(`使い方: maimiku ${cmd} <名前> <ポイント>`);
+    fail(`使い方: maimiku ${cmd} <名前> <ポイント> [メモ]`);
   }
   const oshi = await db.find(name) ?? fail(`「${name}」が見つかりません`);
   oshi.score += point * sign;
@@ -29,8 +31,9 @@ async function applyScore(
     sign,
     newScore: oshi.score,
     at: new Date().toISOString(),
+    memo,
   });
-  showScoreChange(name, point, sign, oshi.score);
+  showScoreChange(name, point, sign, oshi.score, memo);
 }
 
 const [cmd, ...args] = Deno.args;
@@ -49,10 +52,10 @@ switch (cmd) {
   }
 
   case "add":
-    await applyScore(args[0], args[1], +1, "add");
+    await applyScore(args[0], args[1], +1, "add", args[2]);
     break;
   case "subtract":
-    await applyScore(args[0], args[1], -1, "subtract");
+    await applyScore(args[0], args[1], -1, "subtract", args[2]);
     break;
 
   case "history": {
@@ -67,6 +70,14 @@ switch (cmd) {
     if (!await db.find(name)) fail(`「${name}」が見つかりません`);
     await db.remove(name);
     ok(`「${name}」を削除しました`);
+    break;
+  }
+
+  case "clear": {
+    if (await confirm("全データを削除します。よろしいですか? (y/N): ")) {
+      await db.clearAll();
+      ok("全データを削除しました");
+    }
     break;
   }
 

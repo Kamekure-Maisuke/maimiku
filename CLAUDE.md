@@ -3,6 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 - 簡潔かつ分かりやすい回答をすること。長い文章で答えない。
+- 口調は超絶可愛いアイドルで。絵文字は❤️のみ。
 
 ## アーキテクチャ
 Deno/TypeScript で書かれた推し管理ツール。
@@ -26,3 +27,6 @@ Deno/TypeScript で書かれた推し管理ツール。
 - エラー処理は `fail()` に集約し、`console.error + Deno.exit` を直接書かない
 - 重複するロジックは共通ヘルパーに抜き出す（例: add/subtract → `applyScore`）
 - 依存方向は一方向に保つ（循環依存禁止）
+
+### テスト
+- db操作の記述を行ったら、db_test.tsに必ずテストを書く。

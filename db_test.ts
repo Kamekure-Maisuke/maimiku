@@ -30,18 +30,33 @@ Deno.test("db", async (t) => {
     });
   });
 
+  await t.step("addHistory with memo", async () => {
+    await db.addHistory({
+      name: "ミク",
+      point: 20,
+      sign: 1,
+      newScore: 130,
+      at: "2026-04-12T00:30:00.000Z",
+      memo: "ライブ最高だった",
+    });
+    const list = await db.getHistory("ミク");
+    const withMemo = list.find((h) => h.memo !== undefined);
+    assertEquals(withMemo?.memo, "ライブ最高だった");
+  });
+
   await t.step("getHistory", async () => {
     await db.addHistory({
       name: "ミク",
       point: 5,
       sign: -1,
-      newScore: 105,
+      newScore: 125,
       at: "2026-04-12T01:00:00.000Z",
     });
     const list = await db.getHistory("ミク");
-    assertEquals(list.length, 2);
-    assertEquals(list[1].sign, -1);
-    assertEquals(list[1].newScore, 105);
+    assertEquals(list.length, 3);
+    assertEquals(list[2].sign, -1);
+    assertEquals(list[2].newScore, 125);
+    assertEquals(list[2].memo, undefined);
   });
 
   await t.step("find returns null for unknown", async () => {
@@ -57,6 +72,20 @@ Deno.test("db", async (t) => {
   await t.step("remove", async () => {
     await db.remove("ミク");
     assertEquals(await db.find("ミク"), null);
+  });
+
+  await t.step("clearAll", async () => {
+    await db.save({ name: "リン", score: 50 });
+    await db.addHistory({
+      name: "リン",
+      point: 50,
+      sign: 1,
+      newScore: 50,
+      at: "2026-04-12T02:00:00.000Z",
+    });
+    await db.clearAll();
+    assertEquals(await db.getAll(), []);
+    assertEquals(await db.getHistory("リン"), []);
   });
 
   db.closeDb();

@@ -17,6 +17,14 @@ function bar(value: number, max: number, color: (s: string) => string): string {
   return color("█".repeat(filled)) + dim("░".repeat(20 - filled));
 }
 
+export async function confirm(prompt: string): Promise<boolean> {
+  await Deno.stdout.write(new TextEncoder().encode(`  ${yellow(prompt)}`));
+  const buf = new Uint8Array(4);
+  const n = await Deno.stdin.read(buf);
+  const answer = new TextDecoder().decode(buf.subarray(0, n ?? 0)).trim().toLowerCase();
+  return answer === "y";
+}
+
 export const fail = (msg: string): never => {
   console.error(red(msg));
   Deno.exit(1);
@@ -51,9 +59,11 @@ export function showScoreChange(
   point: number,
   sign: 1 | -1,
   newScore: number,
+  memo?: string,
 ): void {
   const diff = sign > 0 ? green(`+${point}`) : red(`-${point}`);
-  ok(`「${name}」 ${diff} → ${yellow(String(newScore))}  ${rank(newScore)}`);
+  const memoStr = memo ? `  ${dim(`"${memo}"`)}` : "";
+  ok(`「${name}」 ${diff} → ${yellow(String(newScore))}  ${rank(newScore)}${memoStr}`);
 }
 
 export function showHistory(name: string, list: History[]): void {
@@ -63,11 +73,12 @@ export function showHistory(name: string, list: History[]): void {
   }
   console.log(`\n  ${bold(cyan(`「${name}」のポイント変動履歴`))}\n`);
   new Table()
-    .header([dim("日時"), dim("変動"), dim("合計")])
+    .header([dim("日時"), dim("変動"), dim("合計"), dim("メモ")])
     .body(list.map((h) => [
       dim(new Date(h.at).toLocaleString("ja-JP")),
       h.sign > 0 ? green(`+${h.point}`) : red(`-${h.point}`),
       yellow(String(h.newScore)),
+      h.memo ? dim(h.memo) : "",
     ]))
     .indent(2)
     .padding(1)
@@ -82,9 +93,10 @@ export function showHelp(): void {
   ${dim("コマンド:")}
     list                       推し一覧を表示
     init <名前>                推しを追加
-    add <名前> <ポイント>      ポイントを加算
-    subtract <名前> <ポイント> ポイントを減算
+    add <名前> <ポイント> [メモ]      ポイントを加算
+    subtract <名前> <ポイント> [メモ] ポイントを減算
     remove <名前>              推しを削除
     history <名前>             ポイント変動履歴を表示
+    clear                      全データを削除
 `);
 }
